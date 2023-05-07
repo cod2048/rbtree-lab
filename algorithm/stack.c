@@ -84,7 +84,6 @@ int main(void)
     printf("값: %d\n", pop(&s));
     printf("값: %d\n", pop(&s));
     printf("값: %d\n", pop(&s));
-    
 
     return 0;
 }
