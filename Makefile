@@ -1,18 +1,14 @@
-.PHONY: help build test
+CC = gcc
+TARGET = test.out
+OBJS = test.o
 
-help:
-# http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-	@grep -E '^[a-zA-Z0-9_%/-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+all: $(TARGET)
 
-build:
-build: ## Build executables
-	$(MAKE) -C src
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^
 
-test:
-test: ## Test rbtree implementation
-	$(MAKE) -C test test
-	
+$(OBJS): test.c
+	$(CC) -c -o $@ $<
+
 clean:
-clean: ## Clear build environment
-	$(MAKE) -C src clean
-	$(MAKE) -C test clean
+	rm -f $(OBJS) $(TARGET)

@@ -1,13 +1,13 @@
 CC = gcc
-TARGET = stack.out
-OBJS = stack.o
+TARGET = que.out
+OBJS = que.o
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $^
 
-$(OBJS): stack.c
+$(OBJS): que.c
 	$(CC) -c -o $@ $<
 
 clean:
