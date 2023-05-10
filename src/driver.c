@@ -16,12 +16,14 @@ int main(int argc, char *argv[])
     rbtree_insert(t, 24);
     rbtree_insert(t, 2);
     rbtree_insert(t, 12);
-    if(t->root != t->nil){
-    printf("최솟값:%d\n",rbtree_min(t)->key);
-    printf("최댓값:%d\n",rbtree_max(t)->key);
-    printf("찾는값:%d\n",rbtree_find(t, 12)->key);
+    if (t->root != t->nil)
+    {
+        printf("최솟값:%d\n", rbtree_min(t)->key);
+        printf("최댓값:%d\n", rbtree_max(t)->key);
+        printf("찾는값:%d\n", rbtree_find(t, 12)->key);
     }
-    else{
+    else
+    {
         printf("확인");
     }
 }

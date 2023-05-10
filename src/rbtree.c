@@ -17,9 +17,20 @@ rbtree *new_rbtree(void)
   return p;
 }
 
+void tree_free(rbtree *t, node_t *d)
+{
+  if (d != t->nil)
+  {
+    tree_free(t, d->left);
+    tree_free(t, d->right);
+    free(d);
+  }
+}
 void delete_rbtree(rbtree *t)
 {
   // TODO: reclaim the tree nodes's memory
+  tree_free(t, t->root);
+  free(t->nil);
   free(t);
 }
 
@@ -173,7 +184,8 @@ node_t *rbtree_find(const rbtree *t, const key_t key)
   node_t *find = t->root;
   while (find->key != key)
   {
-    if(find == t->nil){
+    if (find == t->nil)
+    {
       return NULL;
     }
     else if (find->key < key)
@@ -210,14 +222,156 @@ node_t *rbtree_max(const rbtree *t)
   return max;
 }
 
+void transplant(rbtree *t, node_t *u, node_t *v)
+{
+  if (u->parent == t->nil)
+  {
+    t->root = v;
+  }
+  else if (u == u->parent->left)
+  {
+    u->parent->left = v;
+  }
+  else
+  {
+    u->parent->right = v;
+  }
+  v->parent = u->parent;
+}
 int rbtree_erase(rbtree *t, node_t *p)
 {
   // TODO: implement erase
+  node_t *node = p;
+  node_t *x = t->nil;
+  node_t *w = t->nil;
+  color_t originalcolor = node->color;
+  if (p->left == t->nil)
+  {
+    x = p->right;
+    transplant(t, p, p->right);
+  }
+  else if (p->right == t->nil)
+  {
+    x = p->left;
+    transplant(t, p, p->left);
+  }
+  else
+  {
+    // p의 자식이 둘일 때
+    node = node->right;
+    while (node->left != t->nil)
+    {
+      node = node->left;
+    }
+    originalcolor = node->color;
+    x = node->right;
+    if (node->parent == p)
+    {
+      x->parent = node;
+    }
+    else
+    {
+      transplant(t, node, node->right);
+      node->right = p->right;
+      node->right->parent = node;
+    }
+    transplant(t, p, node);
+    node->left = p->left;
+    node->left->parent = node;
+    node->color = p->color;
+  }
+  if (originalcolor == RBTREE_BLACK)
+  {
+    // fixup
+    while (x != t->root && x->color == RBTREE_BLACK)
+    {
+      if (x == x->parent->left)
+      {
+        w = x->parent->right;
+        if (w->color == RBTREE_RED)
+        {
+          w->color = RBTREE_BLACK;
+          x->parent->color = RBTREE_RED;
+          l_rotation(t, x->parent);
+          w = x->parent->right;
+        }
+        if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK)
+        {
+          w->color = RBTREE_RED;
+          x = x->parent;
+        }
+        else
+        {
+          if (w->right->color == RBTREE_BLACK)
+          {
+            w->left->color = RBTREE_BLACK;
+            w->color = RBTREE_RED;
+            r_rotation(t, w);
+            w = x->parent->right;
+          }
+          w->color = x->parent->color;
+          x->parent->color = RBTREE_BLACK;
+          w->right->color = RBTREE_BLACK;
+          l_rotation(t, x->parent);
+          x = t->root;
+        }
+      }
+      else
+      {
+        w = x->parent->left;
+        if (w->color == RBTREE_RED)
+        {
+          w->color = RBTREE_BLACK;
+          x->parent->color = RBTREE_RED;
+          r_rotation(t, x->parent);
+          w = x->parent->left;
+        }
+        if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK)
+        {
+          w->color = RBTREE_RED;
+          x = x->parent;
+        }
+        else
+        {
+          if (w->left->color == RBTREE_BLACK)
+          {
+            w->right->color = RBTREE_BLACK;
+            w->color = RBTREE_RED;
+            l_rotation(t, w);
+            w = x->parent->left;
+          }
+          w->color = x->parent->color;
+          x->parent->color = RBTREE_BLACK;
+          w->left->color = RBTREE_BLACK;
+          r_rotation(t, x->parent);
+          x = t->root;
+        }
+      }
+    }
+  }
+  x->color = RBTREE_BLACK;
   return 0;
 }
-
+// Tree to In-order Array
+int Inorder(const rbtree *t, node_t *node, key_t *arr, const size_t n, int idx)
+{
+  if (idx < n)
+  {
+    if (node->left != t->nil)
+    {
+      idx = Inorder(t, node->left, arr, n, idx);
+    }
+    arr[idx++] = node->key;
+    if (node->right != t->nil)
+    {
+      idx = Inorder(t, node->right, arr, n, idx);
+    }
+  }
+  return idx;
+}
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n)
 {
   // TODO: implement to_array
+  Inorder(t, t->root, arr, n, 0);
   return 0;
 }
