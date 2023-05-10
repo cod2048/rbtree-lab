@@ -123,7 +123,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key)
       {
         if (new_node->parent->right == new_node)
         {
-          new_node=new_node->parent;
+          new_node = new_node->parent;
           l_rotation(t, new_node);
         }
         new_node->parent->parent->color = RBTREE_RED;
@@ -170,25 +170,44 @@ node_t *rbtree_insert(rbtree *t, const key_t key)
 node_t *rbtree_find(const rbtree *t, const key_t key)
 {
   // TODO: implement find
-  return t->root;
+  node_t *find = t->root;
+  while (find->key != key)
+  {
+    if(find == t->nil){
+      return NULL;
+    }
+    else if (find->key < key)
+    {
+      find = find->right;
+    }
+    else
+    {
+      find = find->left;
+    }
+  }
+  return find;
 }
 
 node_t *rbtree_min(const rbtree *t)
 {
   // TODO: implement find
-  while (t->root != t->nil){
-    t->root->left = t->root->left->left;
+  node_t *min = t->root;
+  while (min->left != t->nil)
+  {
+    min = min->left;
   }
-  return t->root;
+  return min;
 }
 
 node_t *rbtree_max(const rbtree *t)
 {
   // TODO: implement find
-  while (t->root->right != t->nil){
-    t->root->right = t->root->right->right;
+  node_t *max = t->root;
+  while (max->right != t->nil)
+  {
+    max = max->right;
   }
-  return t->root;
+  return max;
 }
 
 int rbtree_erase(rbtree *t, node_t *p)
